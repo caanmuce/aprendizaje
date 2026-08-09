@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 from config.db_config import DB_CONFIG
 
+# Gestor de base de datos que maneja la conexión y operaciones con MariaDB
 class GestorBD:
     def __init__(self):
         """Inicializa la conexión con MariaDB"""
@@ -13,6 +14,7 @@ class GestorBD:
     def conectar(self):
         """Establece conexión con MariaDB"""
         try:
+            # Crear conexión usando datos de config/db_config.py
             self.conexion = mysql.connector.connect(**DB_CONFIG)
             self.cursor = self.conexion.cursor()
             print("✓ Conexión exitosa a MariaDB")
@@ -30,6 +32,7 @@ class GestorBD:
     def crear_tabla(self):
         """Crea la tabla de operaciones si no existe"""
         try:
+            # Ejecuta la creación de tabla solo la primera vez
             self.cursor.execute('''
                 CREATE TABLE IF NOT EXISTS operaciones (
                     id INT AUTO_INCREMENT PRIMARY KEY,
