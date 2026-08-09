@@ -138,6 +138,8 @@ class formulario_calculadora(tk.Tk):
                 expr_eval = expression
                 expr_eval = re.sub(r'(?<=\d)√', r'*√', expr_eval)
                 expr_eval = re.sub(r'√(\d+(\.\d+)?)', r'math.sqrt(\1)', expr_eval)
+                expr_eval = expr_eval.replace('^', '**')
+                
 
                 # Evaluar la expresión incluyendo el módulo math
                 result = eval(expr_eval, {"__builtins__": None, "math": math})
