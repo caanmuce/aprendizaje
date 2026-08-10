@@ -4,6 +4,9 @@ from tkinter import font
 from tkinter import messagebox
 import math
 import re
+import os
+import sys
+import subprocess
 
 # Importar configuración de colores y utilidades de ventana
 from config import constantes as cons
@@ -16,6 +19,13 @@ class formulario_calculadora(tk.Tk):
         super().__init__()
         self.db = None
         self.resultado_mostrado = False  # Bandera para saber si se mostró un resultado
+        self.error_mostrado = False  # Bandera para saber si se está mostrando un error
+        # Mapeo de resultados numéricos a rutas de archivos multimedia (audio/video)
+        # Edita las rutas según tus archivos locales.
+        self.media_map = {
+            67: r"C:\Users\caanm\Downloads\AY 67 - Sound Effect (HD).mp4",
+            # Ejemplo: 7: r"C:\path\to\sound.mp3"
+        }
         try:
             self.db = GestorBD()  # Inicializa la conexión a MariaDB
         except Exception as e:
@@ -114,12 +124,14 @@ class formulario_calculadora(tk.Tk):
             self.entry.delete(0, tk.END)
             self.operation_label.config(text="")
             self.resultado_mostrado = False
+            self.error_mostrado = False
 
         elif button == '<':
             current_text = self.entry.get()
             self.entry.delete(0, tk.END)
             self.entry.insert(0, current_text[:-1])
             self.resultado_mostrado = False
+            self.error_mostrado = False
 
         elif button == 'x²':
             # Muestra el símbolo de potencia en la pantalla
@@ -150,6 +162,16 @@ class formulario_calculadora(tk.Tk):
 
                 self.resultado_mostrado = True
 
+                # Reacción a resultados específicos: reproducir media si hay coincidencia
+                try:
+                    key = result
+                    if isinstance(key, float) and float(key).is_integer():
+                        key = int(key)
+                    if key in self.media_map:
+                        self.play_media(self.media_map[key])
+                except Exception as e:
+                    print(f"Error al intentar reproducir media: {e}")
+
                 # Guardar en MariaDB si está disponible
                 if self.db:
                     self.db.guardar_operacion(expression, str(result))
@@ -162,9 +184,18 @@ class formulario_calculadora(tk.Tk):
                 self.entry.delete(0, tk.END)
                 self.entry.insert(0, "Error")
                 print(f"Error al evaluar la expresión: {e}")
+                self.resultado_mostrado = False
+                self.error_mostrado = True
+
         else:
+            # Si hay un error mostrado, reemplazarlo con la nueva entrada
+            if self.error_mostrado:
+                self.entry.delete(0, tk.END)
+                self.entry.insert(0, button)
+                self.error_mostrado = False
+                self.resultado_mostrado = False
             # Agregar dígito u operador a la entrada
-            if self.resultado_mostrado:
+            elif self.resultado_mostrado:
                 if button in '0123456789.':
                     # Reemplazar el resultado con el nuevo número
                     self.entry.delete(0, tk.END)
@@ -234,3 +265,15 @@ class formulario_calculadora(tk.Tk):
                 messagebox.showinfo("Éxito", "Historial eliminado correctamente")
             else:
                 messagebox.showerror("Error", "No se pudo limpiar el historial")
+
+    def play_media(self, filepath):
+        """Intenta reproducir/abrir un archivo multimedia con el reproductor por defecto."""
+        try:
+            if sys.platform.startswith('win'):
+                os.startfile(filepath)
+            elif sys.platform.startswith('darwin'):
+                subprocess.Popen(['open', filepath])
+            else:
+                subprocess.Popen(['xdg-open', filepath])
+        except Exception as e:
+            messagebox.showerror("Error reproducción", f"No se pudo abrir el archivo: {e}")
