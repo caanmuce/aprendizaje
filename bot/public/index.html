@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Agendamiento de Citas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f4f4f9; }
+        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; max-width: 400px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
+        button { background-color: #25D366; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Formulario Login -->
+    <div id="loginCard" class="card">
+        <h2>Inicio de Sesión</h2>
+        <input type="text" id="username" placeholder="Usuario (ej. admin)">
+        <input type="password" id="password" placeholder="Contraseña (ej. admin123)">
+        <button onclick="login()">Ingresar</button>
+        <p id="loginMsg" style="color:red;"></p>
+    </div>
+
+    <!-- Formulario Agendamiento -->
+    <div id="agendarCard" class="card hidden">
+        <h2>Agendar Nueva Cita</h2>
+        <input type="text" id="nombre" placeholder="Nombre del Paciente">
+        <input type="text" id="telefono" placeholder="Teléfono con código (Ej: 573001234567)">
+        <input type="datetime-local" id="fecha_hora">
+        <button onclick="agendar()">Guardar Cita</button>
+        <p id="agendarMsg" style="color:green;"></p>
+    </div>
+
+    <script>
+        async function login() {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('loginCard').classList.add('hidden');
+                document.getElementById('agendarCard').classList.remove('hidden');
+            } else {
+                document.getElementById('loginMsg').innerText = data.message;
+            }
+        }
+
+        async function agendar() {
+            const res = await fetch('/api/agendar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: document.getElementById('nombre').value,
+                    telefono: document.getElementById('telefono').value,
+                    fecha_hora: document.getElementById('fecha_hora').value
+                })
+            });
+            const data = await res.json();
+            document.getElementById('agendarMsg').innerText = data.message || data.error;
+        }
+    </script>
+</body>
+</html>
