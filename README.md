@@ -173,6 +173,3 @@ Este proyecto tiene carácter educativo. Antes de usarlo en producción se recom
 - Evitar rutas absolutas para archivos multimedia y configurar esos recursos externamente.
 - Añadir cierre explícito de la conexión a la base de datos al cerrar la aplicación.
 
-## Licencia
-
-No se ha definido una licencia para este proyecto. Añade una licencia antes de distribuirlo públicamente.
